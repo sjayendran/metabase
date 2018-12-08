@@ -48,13 +48,18 @@ sample-dataset() {
     fi
 }
 
+drivers() {
+    echo "Building Metabase drivers..."
+    ./bin/build-drivers.sh
+}
+
 uberjar() {
     echo "Running 'lein uberjar'..."
-    lein uberjar
+    lein clean && lein uberjar
 }
 
 all() {
-    version && translations && frontend && sample-dataset && uberjar
+    version && translations && frontend && sample-dataset && drivers && uberjar
 }
 
 no-translations() {
