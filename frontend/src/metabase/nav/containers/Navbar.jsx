@@ -26,6 +26,8 @@ import Modal from "metabase/components/Modal";
 import CreateDashboardModal from "metabase/components/CreateDashboardModal";
 
 import ProfileLink from "metabase/nav/components/ProfileLink.jsx";
+import DynamicSearch from "metabase/nav/components/DynamicSearch.jsx";
+
 
 import { getPath, getContext, getUser } from "../selectors";
 import { entityListLoader } from "metabase/entities/containers/EntityListLoader";
@@ -121,7 +123,7 @@ class SearchBar extends React.Component {
           active={active}
         >
           <Icon name="search" ml={2} />
-          <SearchInput
+          {/* <SearchInput
             w={1}
             py={2}
             pr={2}
@@ -138,7 +140,8 @@ class SearchBar extends React.Component {
                 });
               }
             }}
-          />
+          /> */}
+          <DynamicSearch />
         </SearchWrapper>
       </OnClickOutsideWrapper>
     );
