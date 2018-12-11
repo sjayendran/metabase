@@ -11,6 +11,8 @@ export default class DynamicSearch extends React.Component {
     this.state = {
       suggestions: [],
       rawItemList: [],
+      cardList: [],
+      dashboardList: [],
       value: "",
     };
   }
@@ -25,7 +27,7 @@ export default class DynamicSearch extends React.Component {
       : this.state.rawItemList.sort().filter(v => regex.test(v.name));
   };
 
-  renderSuggestion = suggestion => <div>{suggestion.name}</div>;
+  renderSuggestion = suggestion => <div>{suggestion.name}{this.state.cardList.includes(suggestion) ? ' [Question / Card]' : ' [Dashboard]'}</div>;
 
   onTextChanged = (event, { newValue }) => {
     this.setState({
@@ -33,9 +35,11 @@ export default class DynamicSearch extends React.Component {
     });
   };
 
-  clickDashboardSuggestion = e => {
-    window.location = "/dashboard/" + e.target.value;
-  };
+  // clickDashboardSuggestion = e => {
+  //   console.log("$@$@$@ clicked this value");
+  //   console.log(e);
+  //   window.location = "/dashboard/" + e.target.value;
+  // };
 
   getMetabaseSessionKey() {
     let match = document.cookie.match(
@@ -46,8 +50,46 @@ export default class DynamicSearch extends React.Component {
     }
   }
 
-  componentDidMount() {
-    let self = this;
+  getCardList(self){
+    fetch("http://" + window.location.hostname + ":3000/api/card", {
+      method: "GET",
+      mode: "cors",
+      cache: "no-cache",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Metabase-Session": this.getMetabaseSessionKey(),
+      },
+      redirect: "follow",
+      referrer: "no-referrer",
+    })
+      .then(function(response) {
+        if (!response.ok) {
+          throw response;
+        }
+        return response.json();
+      })
+      .then(function(data) {
+        console.log("$#$##$#$ this is the data got back from the cards api:");
+        console.log(data);
+        let filterSearchableCards = data.filter(item => item.description !== null && item.description.toLowerCase().includes("searchable"));
+        //let filterSearchableCards = data.filter(item => item.description.toLowerCase().indexOf('searchable') >= 0);
+        self.setState({
+          cardList: filterSearchableCards
+        },() => {
+          console.log("GOING TO TRY AND CALL the dshboard api now!");
+          self.getDashboardList(self);
+        });
+        //self.getDashboardList(self);
+      })
+      .catch(err => {
+        console.log("Encountered an error while trying to load homepage ");
+        let errObj = JSON.parse(err);
+        console.log(errObj);
+      });
+  }
+
+  getDashboardList(self){
+    console.log("GOINGGOKNG to get DASHBOARD LIST NOW!!!!");
     fetch("http://" + window.location.hostname + ":3000/api/dashboard", {
       method: "GET",
       mode: "cors",
@@ -66,15 +108,25 @@ export default class DynamicSearch extends React.Component {
         return response.json();
       })
       .then(function(data) {
-        self.setState(() => ({
-          rawItemList: data,
-        }));
+        console.log("$#$##$#$ this is the data got back from the dashboard api:");
+        console.log(data);
+        self.setState({
+          rawItemList: self.state.cardList.concat(data),
+          dashboardList: data
+        },() => {
+          console.log("FINISHED getting card and dashboard dataaa!!!");
+          console.log(self.state.rawItemList)
+        });
       })
       .catch(err => {
         console.log("Encountered an error while trying to load homepage ");
         let errObj = JSON.parse(err);
         console.log(errObj);
       });
+  }
+
+  componentDidMount() {
+    this.getCardList(this);
   }
 
   onSuggestionsFetchRequested = ({ value }) => {
@@ -94,7 +146,10 @@ export default class DynamicSearch extends React.Component {
     event,
     { suggestion, suggestionValue, suggestionIndex, sectionIndex, method },
   ) => {
-    window.location = "/dashboard/" + suggestion.id;
+    console.log("$@$@$@ clicked this value");
+    console.log(suggestion);
+    let suggestionTypeSlug = this.state.cardList.includes(suggestion) ? '/card/' : '/dashboard/';
+    window.location = suggestionTypeSlug + suggestion.id;
   };
 
   render() {
@@ -103,7 +158,7 @@ export default class DynamicSearch extends React.Component {
     const { value, suggestions } = this.state;
 
     const inputProps = {
-      placeholder: "Search for a dashboard...",
+      placeholder: "Search for a dashboard or question...",
       value,
       onChange: this.onTextChanged,
     };
