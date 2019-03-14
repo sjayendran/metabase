@@ -4,7 +4,9 @@ import Autosuggest from "react-autosuggest";
 using an auto suggest / auto complete UI component;
 Clicking a suggestion directly navigates the user to the selected
 dashboard.*/
-
+const productionAPIPort = "";
+const devAPIPort = ":3000";
+const prodApp = false;
 export default class DynamicSearch extends React.Component {
   constructor(props) {
     super(props);
@@ -20,7 +22,10 @@ export default class DynamicSearch extends React.Component {
   getSuggestions = value => {
     const inputValue = value.trim().toLowerCase();
     const inputLength = inputValue.length;
-    const regex = new RegExp(`^${inputValue}`, "i");
+    const regex = new RegExp(`${inputValue}`, "gi");
+    // console.log("this is the search string: ", inputValue);
+    // console.log("this is the raw item list: ", this.state.rawItemList);
+    // console.log("this is the regex: ", regex);
 
     return inputLength === 0
       ? []
@@ -51,7 +56,17 @@ export default class DynamicSearch extends React.Component {
   }
 
   getCardList(self){
-    fetch("http://" + window.location.hostname + ":3000/api/card", {
+    let apiURL = "";
+    // console.log("#@$@#$# this is the prod app setting: ", prodApp);
+    if(prodApp){
+      apiURL = "http://" + window.location.hostname + productionAPIPort;
+    }
+    else{
+      apiURL = "http://" + window.location.hostname + devAPIPort;
+    }
+    console.log("fetching cards from this url: ", apiURL);
+    console.log("AND THIS session key: ", this.getMetabaseSessionKey());
+    fetch(apiURL + "/api/card", {
       method: "GET",
       mode: "cors",
       cache: "no-cache",
@@ -89,8 +104,16 @@ export default class DynamicSearch extends React.Component {
   }
 
   getDashboardList(self){
-    console.log("GOINGGOKNG to get DASHBOARD LIST NOW!!!!");
-    fetch("http://" + window.location.hostname + ":3000/api/dashboard", {
+    //console.log("GOINGGOKNG to get DASHBOARD LIST NOW!!!!");
+    let apiURL = "";
+    if(prodApp){
+      apiURL = "http://" + window.location.hostname + productionAPIPort;
+    }
+    else{
+      apiURL = "http://" + window.location.hostname + devAPIPort;
+    }
+    console.log("fetching dashboards from this url: ", apiURL);
+    fetch(apiURL + "/api/dashboard", {
       method: "GET",
       mode: "cors",
       cache: "no-cache",

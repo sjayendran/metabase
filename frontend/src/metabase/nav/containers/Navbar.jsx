@@ -3,9 +3,9 @@ import PropTypes from "prop-types";
 import cx from "classnames";
 import { t } from "c-3po";
 import { Box, Flex } from "grid-styled";
-//import styled from "styled-components";
-//import { space, width } from "styled-system";
-import { width } from "styled-system";
+import styled from "styled-components";
+import { space, width } from "styled-system";
+//import { width } from "styled-system";
 import colors from "metabase/lib/colors";
 import color from "color";
 
@@ -75,19 +75,19 @@ const SearchWrapper = Flex.extend`
   }
 `;
 
-// const SearchInput = styled.input`
-//   ${space} ${width} background-color: transparent;
-//   border: none;
-//   color: white;
-//   font-size: 1em;
-//   font-weight: 700;
-//   &:focus {
-//     outline: none;
-//   }
-//   &::placeholder {
-//     color: ${colors["text-white"]};
-//   }
-// `;
+const SearchInput = styled.input`
+  ${space} ${width} background-color: transparent;
+  border: none;
+  color: white;
+  font-size: 1em;
+  font-weight: 700;
+  &:focus {
+    outline: none;
+  }
+  &::placeholder {
+    color: ${colors["text-white"]};
+  }
+`;
 
 class SearchBar extends React.Component {
   state = {
